@@ -1,29 +1,47 @@
-"""Pydantic models — réexporte les schemas partagés + modèles spécifiques backend."""
+"""Pydantic models — réexporte les schemas partagés."""
 
 from shared.schemas import (  # noqa: F401
+    Certification,
     City,
     CityDetail,
     CityListResponse,
     CityScores,
+    Contact,
+    Experience,
     HealthResponse,
+    Hobby,
+    ParcoursScolaire,
+    PersonalInfo,
+    Projet,
     RecommendationItem,
     RecommendationsResponse,
     Review,
     ReviewCreate,
     ReviewsResponse,
     ScoreCategory,
+    Skill,
+    Techno,
 )
 
 __all__ = [
+    "Certification",
     "City",
     "CityDetail",
     "CityListResponse",
     "CityScores",
+    "Contact",
+    "Experience",
     "HealthResponse",
+    "Hobby",
+    "ParcoursScolaire",
+    "PersonalInfo",
+    "Projet",
     "RecommendationItem",
     "RecommendationsResponse",
     "Review",
     "ReviewCreate",
     "ReviewsResponse",
     "ScoreCategory",
+    "Skill",
+    "Techno",
 ]

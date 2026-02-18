@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from backend.api.routes_personal_infos import router as personal_infos_router
 from backend.api.routes_reviews import router as reviews_router
 from backend.api.routes_reco import router as reco_router
 from backend.core.config import get_settings
@@ -65,6 +66,7 @@ async def generic_error_handler(request: Request, exc: Exception):
 
 # ── Routes ─────────────────────────────────────────────────────
 
+app.include_router(personal_infos_router)
 app.include_router(reviews_router)
 app.include_router(reco_router)
 

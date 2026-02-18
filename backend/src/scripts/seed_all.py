@@ -143,7 +143,6 @@ async def main():
     print("=" * 50)
     print("SmartCity Explorer — Seed")
     print("=" * 50)
-    await seed_postgres()
     await seed_mongo()
     await seed_neo4j()
     print("[seed] Terminé.")

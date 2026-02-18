@@ -9,13 +9,13 @@ from typing import Optional
 
 from backend.models import City, RecommendationItem, RecommendationsResponse
 from backend.repositories.neo4j_repo import Neo4jRepository
-from backend.repositories.postgres_repo import PostgresRepository
+from backend.repositories.mongo_repo import MongoRepository
 
 
 class RecommendationService:
-    def __init__(self, neo4j_repo: Neo4jRepository, postgres_repo: PostgresRepository):
+    def __init__(self, neo4j_repo: Neo4jRepository, mongo_repo: MongoRepository):
         self.neo4j_repo = neo4j_repo
-        self.postgres_repo = postgres_repo
+        self.mongo_repo = mongo_repo
 
     async def get_recommendations(
         self,
@@ -30,7 +30,7 @@ class RecommendationService:
         3. Pour chaque résultat, enrichir avec les infos Postgres si besoin
         4. Construire et retourner un RecommendationsResponse
         """
-        source = await self.postgres_repo.get_city_by_id(city_id)
+        source = await self.mongo_repo.get_city_by_id(city_id)
         if source is None:
             return None
         # Appeler neo4j_repo.get_similar_cities(city_id, k)
@@ -39,12 +39,12 @@ class RecommendationService:
         items = []
         for rec in neo4j_results:
             city_data = rec["city"]
-            # Enrichir avec les données Postgres si le graphe n'a pas tout
+            # Enrichir avec les données MongoDB si le graphe n'a pas tout
             target_id = city_data.get("city_id")
             if target_id:
-                pg_data = await self.postgres_repo.get_city_by_id(target_id)
-                if pg_data:
-                    city_data = pg_data
+                mongo_data = await self.mongo_repo.get_city_by_id(target_id)
+                if mongo_data:
+                    city_data = mongo_data
 
             items.append(
                 RecommendationItem(
