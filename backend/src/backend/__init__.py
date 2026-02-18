@@ -1,0 +1,1 @@
+"""SmartCity Explorer — Backend API."""
