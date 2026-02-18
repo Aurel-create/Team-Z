@@ -1,9 +1,8 @@
-"""Routes API — Recommandations (Neo4j)."""
+"""Routes API — Recommandations (Neo4j + MongoDB)."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.neo4j import get_neo4j_driver
 from backend.models import RecommendationsResponse
@@ -13,11 +12,12 @@ from backend.services.recommendation_service import RecommendationService
 router = APIRouter(tags=["recommendations"])
 
 
-def _get_service(session: AsyncSession = Depends(get_db)) -> RecommendationService:
+def _get_service() -> RecommendationService:
     driver = get_neo4j_driver()
+    db = get_mongo_db()
     return RecommendationService(
         neo4j_repo=Neo4jRepository(driver),
-        postgres_repo=PostgresRepository(session),
+        mongo_repo=MongoRepository(db),
     )
 
 

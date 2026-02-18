@@ -19,9 +19,6 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = False
 
-    # ── PostgreSQL ─────────────────────────────────────────────
-    postgres_url: str = "postgresql+asyncpg://user:password@localhost:5432/smartcity"
-
     # ── MongoDB ────────────────────────────────────────────────
     mongo_url: str = "mongodb://localhost:27017"
     mongo_db: str = "smartcity"
