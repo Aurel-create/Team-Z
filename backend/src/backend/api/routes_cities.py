@@ -1,22 +1,22 @@
-"""Routes API — Villes et scores."""
+"""Routes API — Villes et scores (MongoDB)."""
 
 from __future__ import annotations
 
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.db.postgres import get_db
+from backend.db.mongo import get_mongo_db
 from backend.models import CityDetail, CityListResponse, CityScores
-from backend.repositories.postgres_repo import PostgresRepository
+from backend.repositories.mongo_repo import MongoRepository
 from backend.services.city_service import CityService
 
 router = APIRouter(prefix="/cities", tags=["cities"])
 
 
-def _get_service(session: AsyncSession = Depends(get_db)) -> CityService:
-    return CityService(repo=PostgresRepository(session))
+def _get_service() -> CityService:
+    db = get_mongo_db()
+    return CityService(repo=MongoRepository(db))
 
 
 @router.get("", response_model=CityListResponse)

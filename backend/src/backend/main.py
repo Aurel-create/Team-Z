@@ -33,7 +33,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — permet au frontend Streamlit d'appeler l'API
+# CORS — permet au frontend d'appeler l'API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -41,6 +41,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ── Error handlers ─────────────────────────────────────────────
 @app.exception_handler(NotImplementedError)
@@ -53,7 +54,7 @@ async def not_implemented_handler(request: Request, exc: NotImplementedError):
 
 @app.exception_handler(Exception)
 async def generic_error_handler(request: Request, exc: Exception):
-    """Catch-all : erreurs non gérées → 500 propre (ex. DB indisponible)."""
+    """Catch-all : erreurs non gérées → 500 propre."""
     import logging
 
     logging.getLogger("backend").error("Unhandled error: %s", exc)

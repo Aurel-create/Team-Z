@@ -1,0 +1,39 @@
+[project]
+name = "smartcity-explorer"
+version = "0.1.0"
+description = "SmartCity Explorer — Comparez les villes françaises selon la qualité de vie"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.26",
+    "ruff>=0.3",
+    "backend",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "backend",
+    "shared",
+]
+
+[tool.uv.sources]
+shared = { workspace = true }
+backend = { workspace = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
