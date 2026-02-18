@@ -1,0 +1,10 @@
+{"id": "4u88fg00-9g0f-4cc8-zz6h-6zz9fh380e11", "nom": "Python", "category": "Langage de programmation", "description": "Expertise en scripting, web (Django/FastAPI) et Data."}
+{"id": "5v99gh11-0h1g-5dd9-aa7i-7aa0gi491f22", "nom": "JavaScript / TypeScript", "category": "Langage de programmation", "description": "Développement frontend (React) et backend (Node.js)."}
+{"id": "6w00hi22-1i2h-6ee0-bb8j-8bb1hj502g33", "nom": "SQL", "category": "Base de données", "description": "Requêtes complexes, optimisation, PostgreSQL, MySQL."}
+{"id": "7x11ij33-2j3i-7ff1-cc9k-9cc2ik613h44", "nom": "Git & GitHub", "category": "Outils", "description": "Gestion de versions, Pull Requests, Git Flow."}
+{"id": "8y22jk44-3k4j-8gg2-dd0l-0dd3jl724i55", "nom": "Communication", "category": "Soft Skills", "description": "Capacité à vulgariser des concepts techniques."}
+{"id": "9z33kl55-4l5k-9hh3-ee1m-1ee4km835j66", "nom": "Docker & Kubernetes", "category": "DevOps", "description": "Création d'images, déploiement et orchestration."}
+{"id": "0a44lm66-5m6l-0ii4-ff2n-2ff5ln946k77", "nom": "Anglais", "category": "Langue", "description": "Niveau C1 (Courant professionnel)."}
+{"id": "1b55mn77-6n7m-1jj5-gg3o-3gg6mo057l88", "nom": "Gestion du temps", "category": "Soft Skills", "description": "Priorisation des tâches et respect des deadlines."}
+{"id": "2c66no88-7o8n-2kk6-hh4p-4hh7np168m99", "nom": "GraphQL", "category": "Web API", "description": "Conception d'API flexibles et performantes."}
+{"id": "3d77op99-8p9o-3ll7-ii5q-5ii8oq279n00", "nom": "Linux / Bash", "category": "Système", "description": "Administration serveur et scripting shell."}

@@ -1,0 +1,11 @@
+{
+  "id": "ffc6f207-11ff-4104-969d-4087803f7e7d",
+  "Nom": "Bernard",
+  "Prenom": "Thomas",
+  "Contact": {
+    "liens linkedin": "https://www.linkedin.com/in/tbernard-data",
+    "numéro de téléphone": "+33 6 98 76 54 32",
+    "Adresse mail": "t.bernard@example.com"
+  },
+  "Description": "Expert en Data Engineering avec une spécialisation sur les architectures distribuées et le NoSQL."
+}

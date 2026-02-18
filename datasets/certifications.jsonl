@@ -1,0 +1,10 @@
+{"id": "4k88vw00-9w0v-4ss8-pp6x-6pp9vx380u11", "nom": "AWS Certified Solutions Architect", "image": "aws_sa.png", "description": "Validation des compétences d'architecture cloud AWS.", "obtention_date": "2023-11-15"}
+{"id": "5l99wx11-0x1w-5tt9-qq7y-7qq0wy491v22", "nom": "Google Professional Data Engineer", "image": "gcp_data.png", "description": "Expertise en systèmes de données sur GCP.", "obtention_date": "2024-02-10"}
+{"id": "6m00xy22-1y2x-6uu0-rr8z-8rr1xz502w33", "nom": "Azure Fundamentals (AZ-900)", "image": "azure_fund.png", "description": "Connaissances de base du cloud Microsoft.", "obtention_date": "2022-05-20"}
+{"id": "7n11yz33-2z3y-7vv1-ss9a-9ss2ya613x44", "nom": "TensorFlow Developer Certificate", "image": "tf_logo.png", "description": "Développement de modèles Deep Learning avec TensorFlow.", "obtention_date": "2023-01-10"}
+{"id": "8o22za44-3a4z-8ww2-tt0b-0tt3zb724y55", "nom": "Certified ScrumMaster (CSM)", "image": "scrum_logo.png", "description": "Gestion de projet agile framework Scrum.", "obtention_date": "2021-09-05"}
+{"id": "9p33ab55-4b5a-9xx3-uu1c-1uu4ac835z66", "nom": "MongoDB Certified Developer", "image": "mongo_cert.png", "description": "Modélisation et requêtage NoSQL.", "obtention_date": "2022-12-12"}
+{"id": "0q44bc66-5c6b-0yy4-vv2d-2vv5bd946a77", "nom": "HashiCorp Terraform Associate", "image": "terraform_badge.png", "description": "Infrastructure as Code (IaC).", "obtention_date": "2023-08-30"}
+{"id": "1r55cd77-6d7c-1zz5-ww3e-3ww6ce057b88", "nom": "Docker Certified Associate", "image": "docker_badge.png", "description": "Conteneurisation et orchestration.", "obtention_date": "2022-03-15"}
+{"id": "2s66de88-7e8d-2aa6-xx4f-4xx7df168c99", "nom": "Neo4j Certified Professional", "image": "neo4j_badge.png", "description": "Bases de données orientées graphes.", "obtention_date": "2024-01-05"}
+{"id": "3t77ef99-8f9e-3bb7-yy5g-5yy8eg279d00", "nom": "TOEIC Listening & Reading", "image": "toeic_logo.jpg", "description": "Score 945/990.", "obtention_date": "2020-06-01"}

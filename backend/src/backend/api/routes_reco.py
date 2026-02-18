@@ -6,10 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.neo4j import get_neo4j_driver
-from backend.db.postgres import get_db
 from backend.models import RecommendationsResponse
 from backend.repositories.neo4j_repo import Neo4jRepository
-from backend.repositories.postgres_repo import PostgresRepository
 from backend.services.recommendation_service import RecommendationService
 
 router = APIRouter(tags=["recommendations"])
