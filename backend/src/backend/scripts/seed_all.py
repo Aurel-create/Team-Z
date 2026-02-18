@@ -16,10 +16,9 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from sqlalchemy import text
+
 
 from backend.db.mongo import get_mongo_db
-from backend.db.postgres import get_session_factory
 from backend.db.neo4j import get_neo4j_driver
 
 DATASETS_DIR = Path(__file__).resolve().parents[5] / "datasets"
@@ -27,99 +26,6 @@ DATASETS_DIR = Path(__file__).resolve().parents[5] / "datasets"
 
 import csv
 from sqlalchemy import text
-
-async def seed_postgres():
-    SessionLocal = get_session_factory()
-
-    async with SessionLocal() as session:
-
-        # Création tables
-        await session.execute(text("""
-            CREATE TABLE IF NOT EXISTS cities (
-                id INTEGER PRIMARY KEY,
-                name TEXT,
-                department TEXT,
-                region TEXT,
-                population INTEGER,
-                description TEXT,
-                latitude DOUBLE PRECISION,
-                longitude DOUBLE PRECISION,
-                overall_score DOUBLE PRECISION
-            );
-        """))
-
-        await session.execute(text("""
-    CREATE TABLE IF NOT EXISTS scores (
-        city_id INTEGER NOT NULL,
-        category TEXT NOT NULL,
-        label TEXT,
-        score DOUBLE PRECISION NOT NULL
-    )
-"""))
-
-        await session.commit()
-
-
-        # 🔥 SUPPRESSION avant insertion (important pour le test)
-        await session.execute(text("DELETE FROM scores;"))
-        await session.execute(text("DELETE FROM cities;"))
-
-        await session.commit()
-
-        cities_path = DATASETS_DIR / "cities.csv"
-        with open(cities_path, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                lat = row.get("latitude")
-                lon = row.get("longitude")
-                osc = row.get("overall_score")
-                await session.execute(
-                    text("""
-            INSERT INTO cities (
-                id, name, department, region,
-                population, description,
-                latitude, longitude, overall_score
-            )
-            VALUES (
-                :id, :name, :department, :region,
-                :population, :description,
-                :latitude, :longitude, :overall_score
-            );
-        """),
-                    {
-                        "id": int(row["id"]),
-                        "name": row["name"],
-                        "department": row["department"],
-                        "region": row["region"],
-                        "population": int(row["population"]),
-                        "description": row.get("description") or "",
-                        "latitude": float(lat) if lat else None,
-                        "longitude": float(lon) if lon else None,
-                        "overall_score": float(osc) if osc else 0.0,
-                    },
-                )
-        await session.commit()
-
-        scores_path = DATASETS_DIR / "scores.csv"
-        with open(scores_path, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                await session.execute(
-                    text("""
-    INSERT INTO scores (city_id, category, label, score)
-    VALUES (:city_id, :category, :label, :score)
-"""),
-                    {
-                        "city_id": int(row["city_id"]),
-                        "category": row["category"],
-                        "label": row.get("label") or "",
-                        "score": float(row["score"]),
-                    },
-                )
-
-
-
-        await session.commit()
 
 
 async def seed_mongo():
@@ -223,7 +129,6 @@ async def main():
     print("=" * 50)
     print("SmartCity Explorer — Seed")
     print("=" * 50)
-    await seed_postgres()
     await seed_mongo()
     await seed_neo4j()
     print("[seed] Terminé.")
