@@ -1,0 +1,41 @@
+services:
+  # ── MongoDB ──────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-user0}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-user0}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-user0}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Neo4j ────────────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-user0}
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt
+    volumes:
+      - neo4jdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u ${NEO4J_USER:-neo4j} -p ${NEO4J_PASSWORD:-user0} 'RETURN 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  mongodata:
+  neo4jdata:
