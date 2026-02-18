@@ -1,0 +1,12 @@
+[
+  {"name": "FastAPI", "description": "Framework Python pour APIs", "category": "backend", "level": "advanced"},
+  {"name": "React", "description": "Bibliothèque UI", "category": "frontend", "level": "advanced"},
+  {"name": "MongoDB", "description": "Base de données document", "category": "database", "level": "intermediate"},
+  {"name": "Neo4j", "description": "Graph database", "category": "database", "level": "intermediate"},
+  {"name": "Pandas", "description": "Librairie de data processing", "category": "data", "level": "advanced"},
+  {"name": "Dash", "description": "Framework de visualisation", "category": "frontend", "level": "intermediate"},
+  {"name": "Docker", "description": "Conteneurisation", "category": "devops", "level": "intermediate"},
+  {"name": "GraphQL", "description": "API query language", "category": "backend", "level": "intermediate"},
+  {"name": "TypeScript", "description": "Typed JavaScript", "category": "frontend", "level": "intermediate"},
+  {"name": "Node.js", "description": "JavaScript runtime", "category": "backend", "level": "intermediate"}
+]

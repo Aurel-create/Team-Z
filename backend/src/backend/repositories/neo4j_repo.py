@@ -76,4 +76,35 @@ class Neo4jRepository:
             result = await session.run(query, city_id=city_id)
             records = await result.data() 
             return [record["name"] for record in records]
-        
+
+    async def get_technologies_for_project(self, project_mongo_id: str) -> list[str]:
+        """Retourne la liste des mongo_id (ou names) des technologies liées à un projet."""
+        async with self.driver.session() as session:
+            query = """
+            MATCH (p:Project {mongo_id: $proj_id})-[:USES]->(t:Technology)
+            RETURN collect(t.mongo_id) as ids, collect(t.name) as names
+            """
+            result = await session.run(query, proj_id=project_mongo_id)
+            records = await result.data()
+            if not records:
+                return []
+            rec = records[0]
+            ids = rec.get("ids") or []
+            names = rec.get("names") or []
+            # prefer mongo ids when present, otherwise names
+            return [i if i is not None else n for i, n in zip(ids + [None] * (len(names) - len(ids)), names)]
+
+    async def get_projects_for_technology(self, tech_identifier: str) -> list[str]:
+        """Retourne les mongo_id des projets qui utilisent une technologie (par mongo_id ou nom)."""
+        async with self.driver.session() as session:
+            query = """
+            MATCH (p:Project)-[:USES]->(t:Technology)
+            WHERE t.mongo_id = $ident OR toLower(t.name) = toLower($ident)
+            RETURN collect(p.mongo_id) as proj_ids
+            """
+            result = await session.run(query, ident=tech_identifier)
+            records = await result.data()
+            if not records:
+                return []
+            return records[0].get("proj_ids") or []
+

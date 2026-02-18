@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Portfolio Website",
+    "description": "Site personnel présentant mes projets et mon CV.",
+    "technologies": ["FastAPI", "React", "MongoDB"],
+    "link": "https://example.com/portfolio",
+    "created_at": "2025-06-01T12:00:00Z"
+  },
+  {
+    "title": "Data Visualisation Tool",
+    "description": "Application interactive pour visualiser des jeux de données.",
+    "technologies": ["Dash", "Neo4j", "Pandas"],
+    "link": "",
+    "created_at": "2025-09-15T09:30:00Z"
+  },
+  {
+    "title": "Chat Analytics Platform",
+    "description": "Pipeline d'analyse de conversations pour extraire insights et métriques.",
+    "technologies": ["Python", "FastAPI", "Pandas", "Neo4j"],
+    "link": "https://example.com/chat-analytics",
+    "created_at": "2024-11-10T08:00:00Z"
+  },
+  {
+    "title": "IoT Device Dashboard",
+    "description": "Tableau de bord temps réel pour monitoring d'appareils IoT.",
+    "technologies": ["React", "TypeScript", "Node.js", "MongoDB"],
+    "link": "https://example.com/iot-dashboard",
+    "created_at": "2025-01-20T14:45:00Z"
+  },
+  {
+    "title": "E‑commerce API",
+    "description": "API RESTful pour gestion de catalogue, commandes et paiements.",
+    "technologies": ["FastAPI", "Docker", "MongoDB"],
+    "link": "https://example.com/ecommerce-api",
+    "created_at": "2024-07-05T11:15:00Z"
+  },
+  {
+    "title": "Research Knowledge Graph",
+    "description": "Graphe de connaissances interconnectant publications, auteurs et sujets.",
+    "technologies": ["Neo4j", "Python", "GraphQL"],
+    "link": "",
+    "created_at": "2023-12-01T10:00:00Z"
+  }
+]

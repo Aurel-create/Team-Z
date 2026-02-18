@@ -8,9 +8,13 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api.routes_cities import router as cities_router
-from backend.api.routes_reviews import router as reviews_router
-from backend.api.routes_reco import router as reco_router
+from backend.api.routes_projects import router as projects_router
+from backend.api.routes_experiences import router as experiences_router
+from backend.api.routes_certifications import router as certifications_router
+from backend.api.routes_technologies import router as technologies_router
+from backend.api.routes_education import router as education_router
+from backend.api.routes_hobbies import router as hobbies_router
+from backend.api.routes_contact import router as contact_router
 from backend.core.config import get_settings
 from backend.core.logging import setup_logging
 from backend.db.neo4j import close_neo4j
@@ -29,7 +33,7 @@ settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="API pour explorer et comparer les villes françaises",
+    description="API du portfolio — gestion des projets, expériences, certifications, technologies, parcours et contact",
     lifespan=lifespan,
 )
 
@@ -64,9 +68,13 @@ async def generic_error_handler(request: Request, exc: Exception):
 
 
 # ── Routes ─────────────────────────────────────────────────────
-app.include_router(cities_router)
-app.include_router(reviews_router)
-app.include_router(reco_router)
+app.include_router(projects_router)
+app.include_router(experiences_router)
+app.include_router(certifications_router)
+app.include_router(technologies_router)
+app.include_router(education_router)
+app.include_router(hobbies_router)
+app.include_router(contact_router)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])

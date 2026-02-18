@@ -1,4 +1,10 @@
-"""Configuration centralisée (lecture .env via pydantic-settings)."""
+"""Configuration centralisée (lecture .env via pydantic-settings).
+
+Ce fichier expose les variables d'environnement utilisées par l'application
+portfolio : connexion MongoDB (document store principal) et Neo4j (graphe de
+relations). Les valeurs par défaut sont adaptées à l'exécution via Docker
+Compose (services nommés `mongo` et `neo4j`).
+"""
 
 from __future__ import annotations
 
@@ -15,21 +21,26 @@ class Settings(BaseSettings):
     )
 
     # ── App ────────────────────────────────────────────────────
-    app_name: str = "SmartCity Explorer API"
+    app_name: str = "Portfolio API"
     app_version: str = "0.1.0"
     debug: bool = False
-
-    # ── PostgreSQL ─────────────────────────────────────────────
-    postgres_url: str = "postgresql+asyncpg://user:password@localhost:5432/smartcity"
+    app_host: str = "0.0.0.0"
+    app_port: int = 8000
 
     # ── MongoDB ────────────────────────────────────────────────
-    mongo_url: str = "mongodb://localhost:27017"
-    mongo_db: str = "smartcity"
+    # URL complet (utilisé prioritairement). Par défaut pointe vers le service
+    # `mongo` exposé par docker-compose.
+    mongo_url: str = "mongodb://mongo:27017"
+    # Nom de la base de données
+    mongo_db: str = "user0"
+    # Identifiants (optionnels, selon configuration de Mongo)
+    mongo_user: str = "user0"
+    mongo_password: str = "user0"
 
     # ── Neo4j ──────────────────────────────────────────────────
-    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_uri: str = "bolt://neo4j:7687"
     neo4j_user: str = "neo4j"
-    neo4j_password: str = "password"
+    neo4j_password: str = "user0"
 
 
 @lru_cache

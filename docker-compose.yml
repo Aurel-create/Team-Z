@@ -1,7 +1,12 @@
+# Docker Compose adapté pour le projet portfolio (FastAPI + MongoDB + Neo4j)
+
+# Note: no top-level `version` key (Compose v2+ treats it as optional/obsolete)
+
 services:
-  # ── MongoDB ──────────────────────────────────────────────────
+  # ── MongoDB (document store principal) ─────────────────────────────────────
   mongo:
     image: mongo:7
+    container_name: teamz_mongo
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-user0}
@@ -16,10 +21,13 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - backend-net
 
-  # ── Neo4j ────────────────────────────────────────────────────
+  # ── Neo4j (graph database pour relations) ─────────────────────────────────
   neo4j:
     image: neo4j:5
+    container_name: teamz_neo4j
     restart: unless-stopped
     environment:
       NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-user0}
@@ -34,8 +42,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - backend-net
 
 volumes:
-  pgdata:
   mongodata:
   neo4jdata:
+
+networks:
+  backend-net:
+    driver: bridge
