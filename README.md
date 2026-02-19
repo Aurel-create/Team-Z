@@ -13,20 +13,14 @@ docker compose up
 ### Installation des dépendances 
 
 ```bash
+uv pip install -r requirements.txt
 uv pip install -e ./shared -e ./backend
 ```
 
 ### Seed des informations
 
 ```bash
-$env:PYTHONPATH="backend/src"
-python -m scripts.seed_all
-```
-
-ou 
-
-```bash
-python backend/src/backend/scripts/seed_all.py
+python -m backend.scripts.seed_all
 ```
 
 #### lancement du back-end 
