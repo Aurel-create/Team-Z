@@ -157,97 +157,167 @@ async def seed_neo4j():
                 """, pid=person_id)
 
             # ---------------------------------------------------------
-            # B) Projets ↔ Skills & Technologies
+            # B) Projets ↔ Technologies & Skills (Compétences)
             # ---------------------------------------------------------
-            print("[seed] Neo4j — Analyse sémantique des Projets...")
+            print("[seed] Neo4j — Liaison forte: Projets ↔ Technologies & Compétences...")
+            
+            # 1. Project -> Technology (Si la techno est mentionnée dans le projet)
             await session.run("""
                 MATCH (p:Project), (t:Technology)
                 WHERE toLower(p.description) CONTAINS toLower(t.nom)
-                MERGE (p)-[:USES_TECH]->(t)
+                   OR toLower(p.nom) CONTAINS toLower(t.nom)
+                MERGE (p)-[:USES_TECHNOLOGY]->(t)
             """)
             
+            # 2. Project -> Skill (Si la compétence ou sa catégorie est mentionnée dans le projet)
             await session.run("""
                 MATCH (p:Project), (s:Skill)
                 WHERE toLower(p.description) CONTAINS toLower(s.nom)
+                   OR toLower(p.nom) CONTAINS toLower(s.nom)
+                   OR toLower(p.description) CONTAINS toLower(s.category)
                 MERGE (p)-[:REQUIRES_SKILL]->(s)
             """)
 
-            # ---------------------------------------------------------
-            # C) Expériences ↔ Skills & Technologies
-            # ---------------------------------------------------------
-            print("[seed] Neo4j — Analyse sémantique des Expériences...")
+            # 3. Project -> Experience (Développé dans le cadre d'une entreprise)
             await session.run("""
-                MATCH (e:Experience), (s:Skill)
-                WHERE toLower(e.description) CONTAINS toLower(s.nom) OR toLower(e.nom) CONTAINS toLower(s.nom)
-                MERGE (e)-[:APPLIED_SKILL]->(s)
+                MATCH (p:Project), (e:Experience)
+                WHERE toLower(p.entreprise) = toLower(e.company)
+                   OR toLower(e.description) CONTAINS toLower(p.nom)
+                MERGE (p)-[:DELIVERED_DURING_EXP]->(e)
             """)
-            
-            # NOUVEAU : Une expérience utilise des technos
+
+            # 4. Project -> Education (Projet d'école/académique)
             await session.run("""
-                MATCH (e:Experience), (t:Technology)
-                WHERE toLower(e.description) CONTAINS toLower(t.nom) OR toLower(e.nom) CONTAINS toLower(t.nom)
-                MERGE (e)-[:USED_TECH]->(t)
+                MATCH (p:Project), (ed:Education)
+                WHERE toLower(p.entreprise) CONTAINS toLower(ed.school_name)
+                   OR toLower(p.description) CONTAINS toLower(ed.school_name)
+                   OR toLower(p.description) CONTAINS "académique"
+                   OR toLower(p.description) CONTAINS "école"
+                MERGE (p)-[:ACADEMIC_PROJECT_OF]->(ed)
             """)
 
             # ---------------------------------------------------------
-            # D) Skills ↔ Categories (Organisation)
+            # C) Expériences ↔ TOUT LE RESTE
             # ---------------------------------------------------------
-            print("[seed] Neo4j — Organisation des Skills par Catégorie...")
+            print("[seed] Neo4j — Liaison riche des Expériences...")
+            
+            await session.run("""
+                MATCH (e:Experience), (t:Technology)
+                WHERE toLower(e.description) CONTAINS toLower(t.nom)
+                   OR toLower(e.nom) CONTAINS toLower(t.nom)
+                MERGE (e)-[:USED_TECH_AT_WORK]->(t)
+            """)
+
+            await session.run("""
+                MATCH (e:Experience), (s:Skill)
+                WHERE toLower(e.description) CONTAINS toLower(s.nom)
+                   OR toLower(e.nom) CONTAINS toLower(s.nom)
+                   OR toLower(e.role) CONTAINS toLower(s.category)
+                MERGE (e)-[:APPLIED_SKILL]->(s)
+            """)
+
+            await session.run("""
+                MATCH (e:Experience), (ed:Education)
+                WHERE (toLower(e.type_de_poste) IN ["stage", "alternance", "internship"])
+                  AND substring(toString(e.date_debut), 0, 4) = toString(ed.end_year)
+                MERGE (e)-[:INTERNSHIP_FOR]->(ed)
+            """)
+
+            # ---------------------------------------------------------
+            # D) Certifications ↔ TOUT LE RESTE
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Liaison riche des Certifications...")
+            
+            await session.run("""
+                MATCH (c:Certification), (t:Technology)
+                WHERE toLower(c.nom) CONTAINS toLower(t.nom)
+                   OR toLower(c.description) CONTAINS toLower(t.nom)
+                MERGE (c)-[:CERTIFIES_TECH]->(t)
+            """)
+
+            await session.run("""
+                MATCH (c:Certification), (s:Skill)
+                WHERE toLower(c.nom) CONTAINS toLower(s.nom)
+                   OR toLower(c.description) CONTAINS toLower(s.nom)
+                   OR toLower(c.description) CONTAINS toLower(s.category)
+                MERGE (c)-[:PROVES_SKILL]->(s)
+            """)
+
+            await session.run("""
+                MATCH (c:Certification), (e:Experience)
+                WHERE c.obtention_date IS NOT NULL AND e.date_debut IS NOT NULL
+                  AND substring(toString(c.obtention_date), 0, 4) >= substring(toString(e.date_debut), 0, 4)
+                  AND (e.date_fin IS NULL OR substring(toString(c.obtention_date), 0, 4) <= substring(toString(e.date_fin), 0, 4))
+                MERGE (c)-[:OBTAINED_WHILE_AT]->(e)
+            """)
+
+            # ---------------------------------------------------------
+            # E) Éducation ↔ Skills & Technologies
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Liaison riche de l'Éducation...")
+            
+            await session.run("""
+                MATCH (ed:Education), (t:Technology)
+                WHERE toLower(ed.description) CONTAINS toLower(t.nom)
+                   OR toLower(ed.degree) CONTAINS toLower(t.nom)
+                MERGE (ed)-[:INTRODUCED_TECH]->(t)
+            """)
+
+            await session.run("""
+                MATCH (ed:Education), (s:Skill)
+                WHERE toLower(ed.description) CONTAINS toLower(s.nom)
+                   OR toLower(ed.degree) CONTAINS toLower(s.nom)
+                   OR toLower(ed.degree) CONTAINS toLower(s.category)
+                MERGE (ed)-[:TAUGHT_SKILL]->(s)
+            """)
+
+            # ---------------------------------------------------------
+            # F) Hobbies ↔ Skills & Projets
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Liaison riche des Hobbies...")
+            
+            await session.run("""
+                MATCH (h:Hobby), (s:Skill)
+                WHERE toLower(h.description) CONTAINS toLower(s.nom)
+                   OR toLower(s.description) CONTAINS toLower(h.nom)
+                MERGE (h)-[:CULTIVATES_SKILL]->(s)
+            """)
+
+            await session.run("""
+                MATCH (p:Project), (h:Hobby)
+                WHERE toLower(p.description) CONTAINS toLower(h.nom)
+                   OR toLower(p.nom) CONTAINS toLower(h.nom)
+                MERGE (p)-[:BORN_FROM_HOBBY]->(h)
+            """)
+
+            # ---------------------------------------------------------
+            # G) Le cœur du réacteur : Meta-liens entre Skills et Techs
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Meta-liens finaux...")
+            
             await session.run("""
                 MATCH (s:Skill)
                 WHERE s.category IS NOT NULL AND s.category <> ""
                 MERGE (c:Category {name: s.category})
-                MERGE (s)-[:BELONGS_TO]->(c)
+                MERGE (s)-[:BELONGS_TO_CATEGORY]->(c)
             """)
 
-            # ---------------------------------------------------------
-            # E) Certifications ↔ Skills & Technologies
-            # ---------------------------------------------------------
-            print("[seed] Neo4j — Liaison des Certifications...")
-            await session.run("""
-                MATCH (c:Certification), (s:Skill)
-                WHERE (toLower(c.nom) CONTAINS toLower(s.nom) OR toLower(c.description) CONTAINS toLower(s.nom))
-                MERGE (c)-[:VALIDATES_SKILL]->(s)
-            """)
-            
-            await session.run("""
-                MATCH (c:Certification), (t:Technology)
-                WHERE (toLower(c.nom) CONTAINS toLower(t.nom) OR toLower(c.description) CONTAINS toLower(t.nom))
-                MERGE (c)-[:VALIDATES_TECH]->(t)
-            """)
-
-            # ---------------------------------------------------------
-            # F) Éducation (Parcours Scolaire) ↔ Skills & Technologies
-            # ---------------------------------------------------------
-            print("[seed] Neo4j — Analyse sémantique de l'Éducation...")
-            # NOUVEAU : On apprend des skills à l'école
-            await session.run("""
-                MATCH (ed:Education), (s:Skill)
-                WHERE toLower(ed.description) CONTAINS toLower(s.nom) OR toLower(ed.degree) CONTAINS toLower(s.nom)
-                MERGE (ed)-[:TAUGHT_SKILL]->(s)
-            """)
-            
-            # NOUVEAU : On apprend des technos à l'école
-            await session.run("""
-                MATCH (ed:Education), (t:Technology)
-                WHERE toLower(ed.description) CONTAINS toLower(t.nom) OR toLower(ed.degree) CONTAINS toLower(t.nom)
-                MERGE (ed)-[:TAUGHT_TECH]->(t)
-            """)
-
-            # ---------------------------------------------------------
-            # G) Skills ↔ Technologies (Le liant final)
-            # ---------------------------------------------------------
-            print("[seed] Neo4j — Liaison entre Compétences et Technologies...")
-            # NOUVEAU : Un Skill englobe ou implique une Technologie précise
-            # Ex: Le Skill "Backend" implique la techno "Node.js" si mentionnée
             await session.run("""
                 MATCH (s:Skill), (t:Technology)
-                WHERE toLower(s.description) CONTAINS toLower(t.nom) OR toLower(s.nom) CONTAINS toLower(t.nom)
-                MERGE (s)-[:INVOLVES_TECH]->(t)
+                WHERE toLower(s.description) CONTAINS toLower(t.nom)
+                   OR toLower(s.nom) CONTAINS toLower(t.nom)
+                MERGE (s)-[:IMPLEMENTED_VIA_TECH]->(t)
+            """)
+            
+            await session.run("""
+                MATCH (t1:Technology)<-[:USES_TECHNOLOGY]-(p:Project)-[:USES_TECHNOLOGY]->(t2:Technology)
+                WHERE id(t1) < id(t2)
+                MERGE (t1)-[rel:USED_TOGETHER_WITH]-(t2)
+                ON CREATE SET rel.weight = 1
+                ON MATCH SET rel.weight = rel.weight + 1
             """)
 
         print("[seed] Neo4j — OK (Graphe enrichi et complètement interconnecté)")
-
 
 async def main():
     print("=" * 50)
