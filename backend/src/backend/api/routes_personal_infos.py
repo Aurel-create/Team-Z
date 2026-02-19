@@ -28,8 +28,7 @@ router = APIRouter(prefix="/personal-infos", tags=["personal-infos"])
 async def get_personal_infos():
     """Récupère les informations personnelles."""
     db = get_mongo_db()
-    doc = await db["infos"].find_one()
-    print(doc)
+    doc = await db["personal_infos"].find_one()
     if doc is None:
         raise HTTPException(status_code=404, detail="Aucune info personnelle trouvée")
     return PersonalInfo.model_validate(doc)

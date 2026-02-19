@@ -16,7 +16,6 @@ docker compose up
 python -m backend.scripts.seed_all
 ```
 
-
 #### lancement du back-end 
 ```bash
 uv run python backend/run.py
