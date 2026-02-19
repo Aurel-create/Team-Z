@@ -1,129 +1,121 @@
-"""Repository MongoDB — accès aux avis utilisateurs.
+"""Repository MongoDB — accès aux données du Portfolio.
 
-TODO (étudiants) : Implémenter chaque méthode avec des requêtes MongoDB
-via Motor (async).
+Implémentation des accès aux collections via Motor (async).
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Optional
-
+from typing import Optional, List
 from motor.motor_asyncio import AsyncIOMotorDatabase
-
 
 class MongoRepository:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
-        self.collection = db["reviews"]
+        # Mapping des collections (identique au seed_mongo)
+        self.col_infos = db["personal_infos"]
+        self.col_projects = db["projects"]
+        self.col_experiences = db["experiences"]
+        self.col_educations = db["educations"]
+        self.col_certifications = db["certifications"]
+        self.col_skills = db["skills"]
+        self.col_hobbies = db["hobbies"]
+        self.col_technologies = db["technologies"]
 
-    async def get_reviews(
-    self,
-    city_id: int,
-    *,
-    page: int = 1,
-    page_size: int = 10,
-) -> tuple[list[dict], int]:
-        """Récupère les avis pour une ville avec pagination."""
-        
-        # 1. Définition du filtre (recherche par l'ID de la ville)
-        query = {"city_id": city_id}
-        
-        # 2. Récupération du nombre total pour cette ville (utile pour le front-end)
-        total_count = await self.collection.count_documents(query)
-        
-        # 3. Calcul de l'offset (combien de documents sauter)
-        skip = (page - 1) * page_size
-        
-        # 4. Requête paginée et triée
-        # On trie par 'created_at' descendant (-1) pour avoir les plus récents en premier
-        cursor = self.collection.find(query) \
-                                .sort("created_at", -1) \
-                                .skip(skip) \
-                                .limit(page_size)
-        
-        # 5. Conversion du curseur en liste et nettoyage des IDs
-        reviews = []
-        async for doc in cursor:
-            # On transforme l'ObjectId de Mongo en string pour qu'il soit sérialisable
-            # On le renomme au passage 'id' pour coller aux standards SQL/API
+    def _format_doc(self, doc: dict) -> dict:
+        """Helper pour convertir _id (ObjectId) en id (str)."""
+        if doc and "_id" in doc:
             doc["id"] = str(doc.pop("_id"))
-            reviews.append(doc)
-            
-        return reviews, total_count
+        return doc
 
-        """ TODO: Implémenter avec Motor :
-        - Filtrer par city_id
-        - Trier par created_at décroissant
-        - Paginer avec skip/limit
-        - Retourner (liste_de_docs, total_count)
-        - Convertir ObjectId en str pour le champ "id"
-        """
-        # TODO: Implémenter find + pagination + conversion _id -> id
+    # ---------------------------------------------------------
+    # 1. Infos Personnelles (Profil unique)
+    # ---------------------------------------------------------
+    async def get_personal_info(self) -> Optional[dict]:
+        """Récupère le profil principal."""
+        doc = await self.col_infos.find_one({})
+        return self._format_doc(doc) if doc else None
 
-    
+    # ---------------------------------------------------------
+    # 2. Projets
+    # ---------------------------------------------------------
+    async def get_projects(self) -> List[dict]:
+        """Récupère tous les projets, triés par date de début (récent en premier)."""
+        cursor = self.col_projects.find().sort("date début", -1)
+        projects = []
+        async for doc in cursor:
+            projects.append(self._format_doc(doc))
+        return projects
 
-    async def create_review(self, city_id: int, review_data: dict) -> dict:
+    async def get_project_by_id(self, project_id: str) -> Optional[dict]:
+        """Récupère un projet spécifique par son UUID."""
+        # Note: Vos IDs sont des UUID string stockés dans le champ "id", 
+        # pas l'ObjectId natif de Mongo. On cherche donc sur "id".
+        doc = await self.col_projects.find_one({"id": project_id})
+        return self._format_doc(doc) if doc else None
 
-      # 1. Préparation du document (Enrichissement)
-        # On fait une copie pour ne pas modifier l'original par accident
-        new_doc = review_data.copy()
-        
-        # On ajoute les infos gérées par le système
-        new_doc["city_id"] = city_id
-        new_doc["created_at"] = datetime.now(timezone.utc)
-        
-        # 2. Insertion dans la collection
-        # insert_one renvoie un objet qui contient l'id généré par MongoDB
-        result = await self.collection.insert_one(new_doc)
-        
-        # 3. Récupération et formatage pour le retour
-        # On ajoute l'ID généré au dictionnaire
-        new_doc["id"] = str(result.inserted_id)
-        
-        # On supprime la clé technique '_id' de MongoDB pour rester propre
-        if "_id" in new_doc:
-            new_doc.pop("_id")
-            
-        return new_doc
-    
-        """Crée un nouvel avis pour une ville.
+    # ---------------------------------------------------------
+    # 3. Expériences
+    # ---------------------------------------------------------
+    async def get_experiences(self) -> List[dict]:
+        """Récupère les expériences, triées par date de début."""
+        cursor = self.col_experiences.find().sort("date_debut", -1)
+        exps = []
+        async for doc in cursor:
+            exps.append(self._format_doc(doc))
+        return exps
 
-        TODO: Implémenter :
-        - Ajouter city_id et created_at au document
-        - Insérer dans la collection reviews
-        - Retourner le document créé (avec id converti en str)
-        """
-        # TODO: Implémenter insert_one + city_id/created_at, retourner doc avec id (str)
-        raise NotImplementedError
-        
+    # ---------------------------------------------------------
+    # 4. Parcours Scolaire (Educations)
+    # ---------------------------------------------------------
+    async def get_educations(self) -> List[dict]:
+        """Récupère le parcours scolaire, trié par année de début."""
+        cursor = self.col_educations.find().sort("start_year", -1)
+        edus = []
+        async for doc in cursor:
+            edus.append(self._format_doc(doc))
+        return edus
 
-    async def get_average_rating(self, city_id: int) -> Optional[float]:
-        pipeline = [
-            # On filtre les documents pour la ville ciblée
-            {"$match": {"city_id": city_id}},
-            # On regroupe tous les documents de cette ville pour calculer la moyenne
-            {"$group": {
-                "_id": "$city_id",
-                # On change "average" par "avg_rating" pour que ça plaise au test !
-                "avg_rating": {"$avg": "$rating"} 
-            }}
-        ]
-        
-        cursor = self.collection.aggregate(pipeline)
-        results = await cursor.to_list(length=1)
-        
-        if results:
-            # On utilise la nouvelle clé ici aussi
-            return results[0]["avg_rating"]
-        
-        return None
-        
-        """Calcule la note moyenne pour une ville.
+    # ---------------------------------------------------------
+    # 5. Certifications
+    # ---------------------------------------------------------
+    async def get_certifications(self) -> List[dict]:
+        """Récupère les certifications, triées par date d'obtention."""
+        cursor = self.col_certifications.find().sort("obtention_date", -1)
+        certs = []
+        async for doc in cursor:
+            certs.append(self._format_doc(doc))
+        return certs
 
-        TODO: Implémenter un pipeline d'agrégation MongoDB :
-        - $match par city_id
-        - $group avec $avg sur rating
-        """
-        # TODO: Implémenter pipeline d'agrégation $match + $group $avg
-        raise NotImplementedError
+    # ---------------------------------------------------------
+    # 6. Skills (Compétences)
+    # ---------------------------------------------------------
+    async def get_skills(self) -> List[dict]:
+        """Récupère toutes les compétences."""
+        # On pourrait trier par catégorie si besoin
+        cursor = self.col_skills.find().sort("category", 1)
+        skills = []
+        async for doc in cursor:
+            skills.append(self._format_doc(doc))
+        return skills
+
+    # ---------------------------------------------------------
+    # 7. Hobbies
+    # ---------------------------------------------------------
+    async def get_hobbies(self) -> List[dict]:
+        """Récupère les hobbies."""
+        cursor = self.col_hobbies.find()
+        hobbies = []
+        async for doc in cursor:
+            hobbies.append(self._format_doc(doc))
+        return hobbies
+
+    # ---------------------------------------------------------
+    # 8. Technologies
+    # ---------------------------------------------------------
+    async def get_technologies(self) -> List[dict]:
+        """Récupère les technologies."""
+        cursor = self.col_technologies.find().sort("nom", 1)
+        techs = []
+        async for doc in cursor:
+            techs.append(self._format_doc(doc))
+        return techs

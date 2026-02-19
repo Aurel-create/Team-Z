@@ -30,7 +30,7 @@ services:
     volumes:
       - neo4jdata:/data
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u ${NEO4J_USER:-neo4j} -p ${NEO4J_PASSWORD:-user0} 'RETURN 1'"]
+      test: ["CMD-SHELL", "cypher-shell -u ${NEO4J_USER:-neo4j} -p ${NEO4J_PASSWORD:-password123} 'RETURN 1'"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -137,7 +137,9 @@ async def seed_neo4j():
         if person_id:
             print("[seed] Neo4j — Création des relations...")
             
+            # ---------------------------------------------------------
             # A) Hub Central : Person -> Tout le reste
+            # ---------------------------------------------------------
             relations_map = {
                 "Project": "CREATED",
                 "Experience": "WORKED_AT",
@@ -154,36 +156,42 @@ async def seed_neo4j():
                     MERGE (p)-[:{rel_type}]->(t)
                 """, pid=person_id)
 
-            # B) Liens Contextuels : Project -> Technology / Skill (via description)
+            # ---------------------------------------------------------
+            # B) Projets ↔ Skills & Technologies
+            # ---------------------------------------------------------
             print("[seed] Neo4j — Analyse sémantique des Projets...")
             await session.run("""
                 MATCH (p:Project), (t:Technology)
-                WHERE toLower(p.description) CONTAINS toLower(t.nom) 
-                   OR toLower(p.description) CONTAINS toLower(t.name)
-                MERGE (p)-[:USES]->(t)
+                WHERE toLower(p.description) CONTAINS toLower(t.nom)
+                MERGE (p)-[:USES_TECH]->(t)
             """)
             
             await session.run("""
                 MATCH (p:Project), (s:Skill)
                 WHERE toLower(p.description) CONTAINS toLower(s.nom)
-                   OR toLower(p.description) CONTAINS toLower(s.name)
-                MERGE (p)-[:REQUIRES]->(s)
+                MERGE (p)-[:REQUIRES_SKILL]->(s)
             """)
 
-            # C) Experience -> Skill
+            # ---------------------------------------------------------
+            # C) Expériences ↔ Skills & Technologies
+            # ---------------------------------------------------------
             print("[seed] Neo4j — Analyse sémantique des Expériences...")
             await session.run("""
                 MATCH (e:Experience), (s:Skill)
-                WHERE toLower(e.description) CONTAINS toLower(s.nom)
+                WHERE toLower(e.description) CONTAINS toLower(s.nom) OR toLower(e.nom) CONTAINS toLower(s.nom)
                 MERGE (e)-[:APPLIED_SKILL]->(s)
+            """)
+            
+            # NOUVEAU : Une expérience utilise des technos
+            await session.run("""
+                MATCH (e:Experience), (t:Technology)
+                WHERE toLower(e.description) CONTAINS toLower(t.nom) OR toLower(e.nom) CONTAINS toLower(t.nom)
+                MERGE (e)-[:USED_TECH]->(t)
             """)
 
             # ---------------------------------------------------------
-            # NOUVEAUTÉS DEMANDÉES
+            # D) Skills ↔ Categories (Organisation)
             # ---------------------------------------------------------
-
-            # D) Skill -> Category (Regroupement des Skills)
-            # On extrait la propriété "category" des Skills pour créer des nœuds Category
             print("[seed] Neo4j — Organisation des Skills par Catégorie...")
             await session.run("""
                 MATCH (s:Skill)
@@ -192,22 +200,53 @@ async def seed_neo4j():
                 MERGE (s)-[:BELONGS_TO]->(c)
             """)
 
-            # E) Certification -> Skill / Technology (Validation)
-            # Si le nom ou la description de la certif mentionne un skill/tech
+            # ---------------------------------------------------------
+            # E) Certifications ↔ Skills & Technologies
+            # ---------------------------------------------------------
             print("[seed] Neo4j — Liaison des Certifications...")
             await session.run("""
                 MATCH (c:Certification), (s:Skill)
                 WHERE (toLower(c.nom) CONTAINS toLower(s.nom) OR toLower(c.description) CONTAINS toLower(s.nom))
-                MERGE (c)-[:VALIDATES]->(s)
+                MERGE (c)-[:VALIDATES_SKILL]->(s)
             """)
             
             await session.run("""
                 MATCH (c:Certification), (t:Technology)
                 WHERE (toLower(c.nom) CONTAINS toLower(t.nom) OR toLower(c.description) CONTAINS toLower(t.nom))
-                MERGE (c)-[:VALIDATES]->(t)
+                MERGE (c)-[:VALIDATES_TECH]->(t)
             """)
 
-        print("[seed] Neo4j — OK (Graphe enrichi et complet)")
+            # ---------------------------------------------------------
+            # F) Éducation (Parcours Scolaire) ↔ Skills & Technologies
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Analyse sémantique de l'Éducation...")
+            # NOUVEAU : On apprend des skills à l'école
+            await session.run("""
+                MATCH (ed:Education), (s:Skill)
+                WHERE toLower(ed.description) CONTAINS toLower(s.nom) OR toLower(ed.degree) CONTAINS toLower(s.nom)
+                MERGE (ed)-[:TAUGHT_SKILL]->(s)
+            """)
+            
+            # NOUVEAU : On apprend des technos à l'école
+            await session.run("""
+                MATCH (ed:Education), (t:Technology)
+                WHERE toLower(ed.description) CONTAINS toLower(t.nom) OR toLower(ed.degree) CONTAINS toLower(t.nom)
+                MERGE (ed)-[:TAUGHT_TECH]->(t)
+            """)
+
+            # ---------------------------------------------------------
+            # G) Skills ↔ Technologies (Le liant final)
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Liaison entre Compétences et Technologies...")
+            # NOUVEAU : Un Skill englobe ou implique une Technologie précise
+            # Ex: Le Skill "Backend" implique la techno "Node.js" si mentionnée
+            await session.run("""
+                MATCH (s:Skill), (t:Technology)
+                WHERE toLower(s.description) CONTAINS toLower(t.nom) OR toLower(s.nom) CONTAINS toLower(t.nom)
+                MERGE (s)-[:INVOLVES_TECH]->(t)
+            """)
+
+        print("[seed] Neo4j — OK (Graphe enrichi et complètement interconnecté)")
 
 
 async def main():
