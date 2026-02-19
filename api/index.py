@@ -9,6 +9,6 @@ src_path = Path(__file__).resolve().parent.parent / "backend" / "src"
 sys.path.insert(0, str(src_path))
 
 # 2. On importe directement ton application FastAPI
-from backend.main import app
+from backend.build import app
 
 # Vercel n'a besoin que de cette variable 'app' pour générer ton API !
