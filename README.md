@@ -19,7 +19,8 @@ uv pip install -e ./shared -e ./backend
 ### Seed des informations
 
 ```bash
-python -m backend.scripts.seed_all
+$env:PYTHONPATH="backend/src"
+python -m scripts.seed_all
 ```
 
 ou 
