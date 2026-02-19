@@ -10,6 +10,12 @@ MongoDB et Neo4j.
 docker compose up
 ```
 
+### Installation des dépendances 
+
+```bash
+uv pip install -e ./shared -e ./backend
+```
+
 ### Seed des informations
 
 ```bash
