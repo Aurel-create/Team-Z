@@ -83,6 +83,12 @@ class Projet(BaseModel):
     status: str = ""
 
 
+class ProjetDetail(Projet):
+    """Ajout liens Neo4j."""
+    technologies: list[str] = []
+    skills: list[str] = []
+
+
 # ── Parcours scolaire ─────────────────────────────────────────
 
 class ParcoursScolaire(BaseModel):
