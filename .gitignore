@@ -46,10 +46,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# ── Environments ──────────────────────────────────────────────
-.env
-.env.local
-*.env
+
 
 # ── IDE ────────────────────────────────────────────────────────
 .idea/
