@@ -14,7 +14,5 @@ backend = { path = "./backend", editable = true }
 shared = { path = "./shared", editable = true }
 
 [project.scripts]
-app = "backend.src.backend.app:app"
+app = "app:app"
 
-[tool.vercel.scripts]
-build = "python backend\build.py"
