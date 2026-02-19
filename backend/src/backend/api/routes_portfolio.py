@@ -1,4 +1,4 @@
-"""Routes API — Portfolio / Skills, Projets, Technologies, Hobbies, Expériences, Parcours (MongoDB)."""
+"""Routes API — Portfolio / Skills, Projets, Technologies, Hobbies, Expériences, Parcours (MongoDB + Neo4j)."""
 
 from __future__ import annotations
 
@@ -13,9 +13,15 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
 # ── Skills ──────────────────────────────────────────────────────
 
-@router.get("/skills", response_model=list[Skill])
+@router.get(
+    "/skills",
+    response_model=list[Skill],
+    summary="Liste des compétences",
+    description="Retourne la liste complète des compétences depuis MongoDB.",
+    response_description="Liste des compétences avec id, nom, catégorie et description.",
+    responses={404: {"description": "Aucune compétence trouvée en base de données."}},
+)
 async def get_skills():
-    """Récupère toutes les compétences."""
     db = get_mongo_db()
     docs = await db["skills"].find({}, {"_id": 0}).to_list()
     if not docs:
@@ -25,9 +31,15 @@ async def get_skills():
 
 # ── Projets ─────────────────────────────────────────────────────
 
-@router.get("/projets", response_model=list[Projet])
+@router.get(
+    "/projets",
+    response_model=list[Projet],
+    summary="Liste des projets",
+    description="Retourne la liste complète des projets depuis MongoDB (sans agrégation Neo4j).",
+    response_description="Liste des projets avec nom, dates, description, entreprise et collaborateurs.",
+    responses={404: {"description": "Aucun projet trouvé en base de données."}},
+)
 async def get_projets():
-    """Récupère tous les projets."""
     db = get_mongo_db()
     docs = await db["projects"].find({}, {"_id": 0}).to_list()
     if not docs:
@@ -35,9 +47,18 @@ async def get_projets():
     return [Projet.model_validate(doc) for doc in docs]
 
 
-@router.get("/projets/details", response_model=list[ProjetDetail])
+@router.get(
+    "/projets/details",
+    response_model=list[ProjetDetail],
+    summary="Liste des projets enrichis (MongoDB + Neo4j)",
+    description=(
+        "Retourne les projets depuis MongoDB, enrichis avec les technologies "
+        "et compétences liées via les relations USES_TECHNOLOGY et REQUIRES_SKILL du graphe Neo4j."
+    ),
+    response_description="Liste des projets avec technologies et compétences agrégées depuis Neo4j.",
+    responses={404: {"description": "Aucun projet trouvé en base de données."}},
+)
 async def get_projets_details():
-    """Récupère tous les projets enrichis avec leurs technologies et compétences (Neo4j)."""
     db = get_mongo_db()
     docs = await db["projects"].find({}, {"_id": 0}).to_list()
     if not docs:
@@ -76,9 +97,15 @@ async def get_projets_details():
 
 # ── Technologies ────────────────────────────────────────────────
 
-@router.get("/technologies", response_model=list[Techno])
+@router.get(
+    "/technologies",
+    response_model=list[Techno],
+    summary="Liste des technologies",
+    description="Retourne la liste complète des technologies maîtrisées depuis MongoDB.",
+    response_description="Liste des technologies avec id, nom et image.",
+    responses={404: {"description": "Aucune technologie trouvée en base de données."}},
+)
 async def get_technologies():
-    """Récupère toutes les technologies."""
     db = get_mongo_db()
     docs = await db["technologies"].find({}, {"_id": 0}).to_list()
     if not docs:
@@ -88,9 +115,15 @@ async def get_technologies():
 
 # ── Hobbies ─────────────────────────────────────────────────────
 
-@router.get("/hobbies", response_model=list[Hobby])
+@router.get(
+    "/hobbies",
+    response_model=list[Hobby],
+    summary="Liste des hobbies",
+    description="Retourne la liste complète des loisirs et centres d'intérêt depuis MongoDB.",
+    response_description="Liste des hobbies avec id, nom et description.",
+    responses={404: {"description": "Aucun hobby trouvé en base de données."}},
+)
 async def get_hobbies():
-    """Récupère tous les hobbies."""
     db = get_mongo_db()
     docs = await db["hobbies"].find({}, {"_id": 0}).to_list()
     if not docs:
@@ -100,9 +133,15 @@ async def get_hobbies():
 
 # ── Expériences ─────────────────────────────────────────────────
 
-@router.get("/experiences", response_model=list[Experience])
+@router.get(
+    "/experiences",
+    response_model=list[Experience],
+    summary="Liste des expériences professionnelles",
+    description="Retourne la liste complète des expériences professionnelles depuis MongoDB.",
+    response_description="Liste des expériences avec nom, entreprise, rôle, dates et description.",
+    responses={404: {"description": "Aucune expérience trouvée en base de données."}},
+)
 async def get_experiences():
-    """Récupère toutes les expériences."""
     db = get_mongo_db()
     docs = await db["experiences"].find({}, {"_id": 0}).to_list()
     if not docs:
@@ -112,12 +151,17 @@ async def get_experiences():
 
 # ── Parcours scolaire ──────────────────────────────────────────
 
-@router.get("/parcours-scolaire", response_model=list[ParcoursScolaire])
+@router.get(
+    "/parcours-scolaire",
+    response_model=list[ParcoursScolaire],
+    summary="Liste du parcours scolaire",
+    description="Retourne la liste complète du parcours scolaire depuis MongoDB.",
+    response_description="Liste des formations avec école, diplôme, années et description.",
+    responses={404: {"description": "Aucun parcours scolaire trouvé en base de données."}},
+)
 async def get_parcours_scolaire():
-    """Récupère le parcours scolaire."""
     db = get_mongo_db()
     docs = await db["educations"].find({}, {"_id": 0}).to_list()
     if not docs:
         raise HTTPException(status_code=404, detail="Aucun parcours scolaire trouvé")
     return [ParcoursScolaire.model_validate(doc) for doc in docs]
-
