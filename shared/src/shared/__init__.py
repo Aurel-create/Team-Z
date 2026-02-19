@@ -1,1 +1,0 @@
-"""SmartCity Explorer — Shared schemas."""
