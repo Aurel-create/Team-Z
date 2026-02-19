@@ -42,3 +42,4 @@ async def get_certifications():
     if not docs:
         raise HTTPException(status_code=404, detail="Aucune certification trouvée")
     return [Certification.model_validate(doc) for doc in docs]
+

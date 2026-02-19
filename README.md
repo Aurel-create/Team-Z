@@ -10,6 +10,13 @@ MongoDB et Neo4j.
 docker compose up
 ```
 
+### Seed des informations
+
+```bash
+python -m backend.scripts.seed_all
+```
+
+
 #### lancement du back-end 
 ```bash
 uv run python backend/run.py
