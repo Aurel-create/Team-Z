@@ -9,8 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api.routes_personal_infos import router as personal_infos_router
-from backend.api.routes_reviews import router as reviews_router
-from backend.api.routes_reco import router as reco_router
 from backend.core.config import get_settings
 from backend.core.logging import setup_logging
 from backend.db.neo4j import close_neo4j
@@ -67,11 +65,15 @@ async def generic_error_handler(request: Request, exc: Exception):
 # ── Routes ─────────────────────────────────────────────────────
 
 app.include_router(personal_infos_router)
-app.include_router(reviews_router)
-app.include_router(reco_router)
+#app.include_router(reviews_router)
+#app.include_router(reco_router)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
 async def health():
     """Health check."""
     return HealthResponse(status="ok", version=settings.app_version)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
