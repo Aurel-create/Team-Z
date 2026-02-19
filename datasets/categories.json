@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Frontend",
+    "description": "Bibliothèques et frameworks pour construire les interfaces utilisateur (React, Vue, CSS, HTML, accessibilité)."
+  },
+  {
+    "name": "Backend",
+    "description": "Technologies côté serveur, APIs et logique métier (Node.js, Python, Java, bases de données, frameworks web)."
+  },
+  {
+    "name": "DevOps",
+    "description": "CI/CD, conteneurs, orchestration, infrastructure as code et monitoring (Docker, Kubernetes, Terraform)."
+  },
+  {
+    "name": "Data & ML",
+    "description": "Traitement des données, analytique et machine learning (Pandas, NumPy, scikit-learn, TensorFlow, PyTorch)."
+  },
+  {
+    "name": "Mobile",
+    "description": "Développement mobile natif et cross-platform (Android, iOS, React Native, Flutter)."
+  },
+  {
+    "name": "Cloud",
+    "description": "Services cloud, déploiement et architecture distribuée (AWS, Azure, GCP)."
+  },
+  {
+    "name": "Sécurité",
+    "description": "Sécurité applicative, authentification, autorisation et bonnes pratiques (OWASP, chiffrement)."
+  },
+  {
+    "name": "Testing & QA",
+    "description": "Outils et pratiques de tests automatisés, TDD, tests d'intégration et qualité logicielle (pytest, Jest)."
+  },
+  {
+    "name": "UI/UX",
+    "description": "Conception d'interfaces et d'expériences utilisateur (design system, prototypage, accessibilité)."
+  },
+  {
+    "name": "Tools & Languages",
+    "description": "Langages et outils généraux pour le développement (TypeScript, Go, Rust, Git, linters, tooling)."
+  }
+]

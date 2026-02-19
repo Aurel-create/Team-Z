@@ -1,0 +1,5 @@
+
+[
+  {"school": "Université Exemple", "degree": "Master Informatique", "field": "Data Science", "start_date": "2019-09-01", "end_date": "2021-06-30"},
+  {"school": "École Polytechnique Locale", "degree": "Licence Informatique", "field": "Génie Logiciel", "start_date": "2016-09-01", "end_date": "2019-06-30"}
+]

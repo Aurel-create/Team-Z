@@ -198,3 +198,16 @@ class RecommendationItem(BaseModel):
 class RecommendationsResponse(BaseModel):
     source_city: str
     recommendations: list[RecommendationItem] = []
+
+
+# ── Categories ─────────────────────────────────────────────────
+
+class CategoryCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class CategoryResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
