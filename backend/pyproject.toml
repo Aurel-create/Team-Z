@@ -1,15 +1,18 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "SmartCity Explorer — API Backend (FastAPI)"
-requires-python = ">=3.11"
+description = "Portfolio — Backend API"
+requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.110",
-    "uvicorn[standard]>=0.27",
-    "pydantic>=2.5",
-    "pydantic-settings>=2.1",
-    "motor>=3.3",
-    "neo4j>=5.15"
+    "fastapi>=0.129.0",
+    "uvicorn>=0.41.0",
+    "motor>=3.7.1",
+    "neo4j>=6.1.0",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.0",
+    "python-dotenv>=1.2.1",
+    "httpx>=0.28.1",
+    "shared",
 ]
 
 [build-system]

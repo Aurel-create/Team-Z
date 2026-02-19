@@ -28,7 +28,7 @@ router = APIRouter(prefix="/personal-infos", tags=["personal-infos"])
 async def get_personal_infos():
     """Récupère les informations personnelles."""
     db = get_mongo_db()
-    doc = await db["personal_infos"].find_one()
+    doc = await db["personal_infos"].find_one({}, {"_id": 0})
     if doc is None:
         raise HTTPException(status_code=404, detail="Aucune info personnelle trouvée")
     return PersonalInfo.model_validate(doc)
@@ -37,7 +37,7 @@ async def get_personal_infos():
 async def get_certifications():
     "Récupère les certifications."
     db = get_mongo_db()
-    docs = await db["certifications"].find().to_list()
+    docs = await db["certifications"].find({}, {"_id": 0}).to_list()
     if not docs:
         raise HTTPException(status_code=404, detail="Aucune certification trouvée")
     return [Certification.model_validate(doc) for doc in docs]
