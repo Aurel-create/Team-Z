@@ -1,1 +1,0 @@
-"""Scripts backend (seed, etc.)."""

@@ -2,28 +2,33 @@
 
 Usage: python -m backend.scripts.seed_all
 
-1. seed_mongo : charge tous les JSONL du portfolio dans MongoDB
-2. seed_neo4j : crée le graphe complet dans Neo4j
+TODO (optionnel — étudiants ou fourni) :
+1. Lire datasets/cities.csv et insérer dans PostgreSQL
+2. Lire datasets/scores.csv et insérer dans PostgreSQL
+3. Lire datasets/reviews.jsonl et insérer dans MongoDB
+4. Créer les nœuds et relations dans Neo4j
 """
 
 from __future__ import annotations
 
 import asyncio
+import csv
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+
 
 from backend.db.mongo import get_mongo_db
 from backend.db.neo4j import get_neo4j_driver
 
 DATASETS_DIR = Path(__file__).resolve().parents[4] / "datasets"
 
-
 async def seed_mongo():
     """Charge toutes les collections JSONL dans MongoDB."""
     db = get_mongo_db()
-
+    
     # Mapping : "nom_du_fichier.jsonl" : "nom_de_la_collection_mongo"
+    # Assurez-vous que les fichiers existent bien dans DATASETS_DIR
     collections_map = {
         "infos_personnels.jsonl": "personal_infos",
         "projets.jsonl": "projects",
@@ -32,17 +37,19 @@ async def seed_mongo():
         "certifications.jsonl": "certifications",
         "skills.jsonl": "skills",
         "hobbies.jsonl": "hobbies",
-        "technologies.jsonl": "technologies",
+        "technologies.jsonl": "technologies"
     }
 
     for filename, col_name in collections_map.items():
         file_path = DATASETS_DIR / filename
+        
         if not file_path.exists():
             print(f"[seed] ⚠️  Fichier ignoré (introuvable) : {filename}")
             continue
 
         print(f"[seed] Traitement de {col_name} depuis {filename}...")
-
+        
+        # ✂️ SOLUTION START
         collection = db[col_name]
         await collection.delete_many({})  # Reset de la collection
 
@@ -52,16 +59,15 @@ async def seed_mongo():
                 line = line.strip()
                 if not line:
                     continue
-
+                
                 try:
                     doc = json.loads(line)
+                    # Conservation de votre logique de date
                     if isinstance(doc.get("created_at"), str):
-                        doc["created_at"] = datetime.fromisoformat(
-                            doc["created_at"].replace("Z", "+00:00")
-                        )
+                        doc["created_at"] = datetime.fromisoformat(doc["created_at"].replace("Z", "+00:00"))
                     elif doc.get("created_at") is None:
                         doc["created_at"] = datetime.now(timezone.utc)
-
+                    
                     docs.append(doc)
                 except json.JSONDecodeError:
                     print(f"[seed] Erreur de décodage JSON dans {filename}")
@@ -69,14 +75,16 @@ async def seed_mongo():
         if docs:
             await collection.insert_many(docs)
             print(f"[seed] ✅ {len(docs)} insérés dans '{col_name}'")
+        # ✂️ SOLUTION END
 
     print("[seed] MongoDB — Global OK")
+   
 
 
 async def seed_neo4j():
     """Charge les données JSONL du portfolio dans Neo4j et crée les relations."""
     driver = get_neo4j_driver()
-
+    
     # Mapping: Fichier JSONL -> Label Neo4j
     files_mapping = {
         "infos_personnels.jsonl": "Person",
@@ -86,7 +94,7 @@ async def seed_neo4j():
         "certifications.jsonl": "Certification",
         "skills.jsonl": "Skill",
         "hobbies.jsonl": "Hobby",
-        "technologies.jsonl": "Technology",
+        "technologies.jsonl": "Technology"
     }
 
     async with driver.session() as session:
@@ -95,29 +103,28 @@ async def seed_neo4j():
         await session.run("MATCH (n) DETACH DELETE n")
 
         # 2. Chargement des Nœuds
-        person_id = None
+        person_id = None 
 
         for filename, label in files_mapping.items():
             file_path = DATASETS_DIR / filename
             if not file_path.exists():
                 continue
 
+            # Lecture du fichier JSONL
             nodes_data = []
             with open(file_path, encoding="utf-8") as f:
                 for line in f:
                     if line.strip():
                         data = json.loads(line)
-                        flat_data = {
-                            k: v
-                            for k, v in data.items()
-                            if isinstance(v, (str, int, float, bool))
-                        }
+                        # Aplatir les données pour Neo4j
+                        flat_data = {k: v for k, v in data.items() if isinstance(v, (str, int, float, bool))}
                         nodes_data.append(flat_data)
-
+                        
                         if label == "Person" and not person_id:
                             person_id = data.get("id")
 
             if nodes_data:
+                # Création en batch
                 query = f"""
                 UNWIND $batch AS row
                 MERGE (n:{label} {{id: row.id}})
@@ -129,7 +136,7 @@ async def seed_neo4j():
         # 3. Création des Relations
         if person_id:
             print("[seed] Neo4j — Création des relations...")
-
+            
             # ---------------------------------------------------------
             # A) Hub Central : Person -> Tout le reste
             # ---------------------------------------------------------
@@ -137,20 +144,17 @@ async def seed_neo4j():
                 "Project": "CREATED",
                 "Experience": "WORKED_AT",
                 "Education": "STUDIED_AT",
-                "Certification": "CERTIFIED_IN",
+                "Certification": "OBTAINED",
                 "Skill": "MASTER",
                 "Hobby": "PRACTICES",
-                "Technology": "KNOWS",
+                "Technology": "KNOWS"
             }
-
+            
             for target_label, rel_type in relations_map.items():
-                await session.run(
-                    f"""
+                await session.run(f"""
                     MATCH (p:Person {{id: $pid}}), (t:{target_label})
                     MERGE (p)-[:{rel_type}]->(t)
-                """,
-                    pid=person_id,
-                )
+                """, pid=person_id)
 
             # ---------------------------------------------------------
             # B) Projets ↔ Skills & Technologies
@@ -159,28 +163,90 @@ async def seed_neo4j():
             await session.run("""
                 MATCH (p:Project), (t:Technology)
                 WHERE toLower(p.description) CONTAINS toLower(t.nom)
-                   OR toLower(p.description) CONTAINS toLower(t.name)
-                MERGE (p)-[:USES]->(t)
+                MERGE (p)-[:USES_TECH]->(t)
             """)
-
+            
             await session.run("""
                 MATCH (p:Project), (s:Skill)
                 WHERE toLower(p.description) CONTAINS toLower(s.nom)
-                   OR toLower(p.description) CONTAINS toLower(s.name)
-                MERGE (p)-[:REQUIRES]->(s)
+                MERGE (p)-[:REQUIRES_SKILL]->(s)
             """)
 
             # ---------------------------------------------------------
-            # C) Expériences ↔ Skills
+            # C) Expériences ↔ Skills & Technologies
             # ---------------------------------------------------------
             print("[seed] Neo4j — Analyse sémantique des Expériences...")
             await session.run("""
                 MATCH (e:Experience), (s:Skill)
-                WHERE toLower(e.description) CONTAINS toLower(s.nom)
-                MERGE (e)-[:USED_SKILL]->(s)
+                WHERE toLower(e.description) CONTAINS toLower(s.nom) OR toLower(e.nom) CONTAINS toLower(s.nom)
+                MERGE (e)-[:APPLIED_SKILL]->(s)
+            """)
+            
+            # NOUVEAU : Une expérience utilise des technos
+            await session.run("""
+                MATCH (e:Experience), (t:Technology)
+                WHERE toLower(e.description) CONTAINS toLower(t.nom) OR toLower(e.nom) CONTAINS toLower(t.nom)
+                MERGE (e)-[:USED_TECH]->(t)
             """)
 
-        print("[seed] Neo4j — OK (Graphe complet généré)")
+            # ---------------------------------------------------------
+            # D) Skills ↔ Categories (Organisation)
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Organisation des Skills par Catégorie...")
+            await session.run("""
+                MATCH (s:Skill)
+                WHERE s.category IS NOT NULL AND s.category <> ""
+                MERGE (c:Category {name: s.category})
+                MERGE (s)-[:BELONGS_TO]->(c)
+            """)
+
+            # ---------------------------------------------------------
+            # E) Certifications ↔ Skills & Technologies
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Liaison des Certifications...")
+            await session.run("""
+                MATCH (c:Certification), (s:Skill)
+                WHERE (toLower(c.nom) CONTAINS toLower(s.nom) OR toLower(c.description) CONTAINS toLower(s.nom))
+                MERGE (c)-[:VALIDATES_SKILL]->(s)
+            """)
+            
+            await session.run("""
+                MATCH (c:Certification), (t:Technology)
+                WHERE (toLower(c.nom) CONTAINS toLower(t.nom) OR toLower(c.description) CONTAINS toLower(t.nom))
+                MERGE (c)-[:VALIDATES_TECH]->(t)
+            """)
+
+            # ---------------------------------------------------------
+            # F) Éducation (Parcours Scolaire) ↔ Skills & Technologies
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Analyse sémantique de l'Éducation...")
+            # NOUVEAU : On apprend des skills à l'école
+            await session.run("""
+                MATCH (ed:Education), (s:Skill)
+                WHERE toLower(ed.description) CONTAINS toLower(s.nom) OR toLower(ed.degree) CONTAINS toLower(s.nom)
+                MERGE (ed)-[:TAUGHT_SKILL]->(s)
+            """)
+            
+            # NOUVEAU : On apprend des technos à l'école
+            await session.run("""
+                MATCH (ed:Education), (t:Technology)
+                WHERE toLower(ed.description) CONTAINS toLower(t.nom) OR toLower(ed.degree) CONTAINS toLower(t.nom)
+                MERGE (ed)-[:TAUGHT_TECH]->(t)
+            """)
+
+            # ---------------------------------------------------------
+            # G) Skills ↔ Technologies (Le liant final)
+            # ---------------------------------------------------------
+            print("[seed] Neo4j — Liaison entre Compétences et Technologies...")
+            # NOUVEAU : Un Skill englobe ou implique une Technologie précise
+            # Ex: Le Skill "Backend" implique la techno "Node.js" si mentionnée
+            await session.run("""
+                MATCH (s:Skill), (t:Technology)
+                WHERE toLower(s.description) CONTAINS toLower(t.nom) OR toLower(s.nom) CONTAINS toLower(t.nom)
+                MERGE (s)-[:INVOLVES_TECH]->(t)
+            """)
+
+        print("[seed] Neo4j — OK (Graphe enrichi et complètement interconnecté)")
 
 
 async def main():
