@@ -185,7 +185,7 @@ async def seed_neo4j():
 
 async def main():
     print("=" * 50)
-    print("SmartCity Explorer — Seed")
+    print("Portfolio — Seed")
     print("=" * 50)
     await seed_mongo()
     await seed_neo4j()
