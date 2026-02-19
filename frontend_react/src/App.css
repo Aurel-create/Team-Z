@@ -1,0 +1,263 @@
+.app-shell {
+  width: min(1240px, 96vw);
+  margin: 0 auto;
+  padding: 1.2rem 0 2rem;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.topbar h1 {
+  margin: 0;
+  color: #f9efcf;
+  font-size: 1.4rem;
+}
+
+.api-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.api-controls input {
+  min-width: 260px;
+  border: 1px solid #9f7a46;
+  border-radius: 8px;
+  background: #f8f3e6;
+  color: #3b2b15;
+  padding: 0.55rem 0.75rem;
+}
+
+.api-controls button,
+.pager button,
+.toc-list button {
+  border: 1px solid #b2854f;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f0dfbf, #d7bb8f);
+  color: #3f2b17;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+.api-controls button:hover,
+.pager button:hover,
+.toc-list button:hover {
+  filter: brightness(1.03);
+}
+
+.api-controls button:disabled,
+.pager button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.status {
+  margin: 0.7rem 0 0.2rem;
+  color: #f8e4b8;
+}
+
+.status.error {
+  color: #ffaea3;
+}
+
+.book-scene {
+  position: relative;
+  width: 100%;
+  perspective: 1800px;
+  user-select: none;
+}
+
+.book-shadow {
+  position: absolute;
+  inset: 24px 2% -24px;
+  background: radial-gradient(circle at 50% 50%, rgba(20, 8, 3, 0.46), rgba(20, 8, 3, 0));
+  z-index: 0;
+}
+
+.book-spread {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr;
+  align-items: stretch;
+  min-height: 680px;
+  border-radius: 12px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 220ms ease;
+}
+
+.turn-next .book-spread {
+  transform: rotateY(-10deg);
+}
+
+.turn-prev .book-spread {
+  transform: rotateY(10deg);
+}
+
+.book-page {
+  background: #f8eed2;
+  border: 1px solid #d3b995;
+  padding: 2rem 1.6rem;
+  overflow: auto;
+}
+
+.book-page.left {
+  box-shadow: inset -26px 0 35px rgba(114, 85, 52, 0.2);
+}
+
+.book-page.right {
+  box-shadow: inset 26px 0 35px rgba(114, 85, 52, 0.2);
+}
+
+.spine {
+  background: linear-gradient(90deg, #5f3f1f, #8f663f, #5f3f1f);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.45);
+}
+
+.leaf {
+  color: #3a2815;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 100%;
+}
+
+.leaf h1,
+.leaf h2,
+.leaf h3,
+.leaf h4 {
+  margin: 0;
+  color: #402c17;
+}
+
+.leaf p,
+.leaf li,
+.leaf label {
+  line-height: 1.45;
+}
+
+.cover-page {
+  justify-content: center;
+  background: linear-gradient(145deg, #1f2435, #442614);
+  color: #f6e7c4;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.cover-page h1,
+.cover-page h2 {
+  color: #f6d48f;
+}
+
+.intro-page {
+  justify-content: center;
+}
+
+.small-muted {
+  color: #6d4f2e;
+  font-size: 0.92rem;
+}
+
+.action-hint {
+  margin-top: auto;
+  font-weight: 600;
+}
+
+.toc-list {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.toc-list li {
+  margin-bottom: 0.5rem;
+}
+
+.toc-list button {
+  width: 100%;
+  text-align: left;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.book-card {
+  border: 1px solid #d1b58f;
+  border-radius: 8px;
+  padding: 0.7rem;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.book-card a {
+  color: #7c4e20;
+  font-weight: 700;
+}
+
+.chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  border: 1px solid #b28652;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  background: #efdfbf;
+  font-size: 0.88rem;
+}
+
+.leaf select {
+  border: 1px solid #9f7a46;
+  border-radius: 8px;
+  background: #fff8ea;
+  color: #3b2a16;
+  padding: 0.5rem;
+  max-width: 360px;
+}
+
+.click-zones {
+  display: flex;
+  justify-content: space-between;
+  color: #e4cc9f;
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  color: #f7e3bf;
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 980px) {
+  .book-spread {
+    grid-template-columns: 1fr;
+    min-height: 540px;
+  }
+
+  .spine {
+    display: none;
+  }
+
+  .book-page.right {
+    display: none;
+  }
+
+  .click-zones {
+    font-size: 0.8rem;
+  }
+}
