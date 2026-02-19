@@ -12,3 +12,6 @@ dependencies = [
 [tool.uv.sources]
 backend = { path = "./backend", editable = true }
 shared = { path = "./shared", editable = true }
+
+[project.scripts]
+app = "backend.src.backend.app:app"
